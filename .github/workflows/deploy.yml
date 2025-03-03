@@ -1,15 +1,16 @@
-name: Deploy to AWS ECS
+name: Deploy to AWS ECR
 
 on:
   push:
     branches:
-      - main
+      - main  # Change to your branch name if needed
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Configure AWS Credentials
@@ -21,15 +22,13 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <your-ecr-repo-url>
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 150344000975.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Build and Push Docker Image
+      - name: Build and tag Docker image
         run: |
-          docker build -t ecommerce-app .
-          docker tag ecommerce-app <your-ecr-repo-url>:latest
-          docker push <your-ecr-repo-url>:latest
+          docker build -t my-ecr-repo .
+          docker tag my-ecr-repo:latest 150344000975.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest
 
-      - name: Deploy with Terraform
+      - name: Push Docker image to Amazon ECR
         run: |
-          terraform init
-          terraform apply -auto-approve
+          docker push 150344000975.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest
