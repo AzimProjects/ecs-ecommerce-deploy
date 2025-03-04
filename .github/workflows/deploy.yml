@@ -22,16 +22,17 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REPO_URL }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REPO_URL }} || true
 
       - name: Build and Push Docker Image
         run: |
           docker build -t ecommerce-app .
-          docker tag ecommerce-app ${{ secrets.ECR_REPO_URL }}:latest
-          docker push ${{ secrets.ECR_REPO_URL }}:latest
+          docker tag ecommerce-app ${{ secrets.ECR_REPO_URL }}:${{ github.sha }}
+          docker push ${{ secrets.ECR_REPO_URL }}:${{ github.sha }}
 
       - name: Deploy Infrastructure with Terraform
         run: |
           cd terraform
           terraform init
+          terraform plan
           terraform apply -auto-approve
